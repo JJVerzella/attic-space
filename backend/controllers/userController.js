@@ -36,12 +36,20 @@ const createUser = async (req, res) => {
     }
 };
 
-const deleteUser = (req, res) => {
-    res.json({ text: `Delete user: ${req.params.id}` });
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findOneAndDelete({ email: req.user.email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        res.status(204).json();
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
 };
 
 const getUser = (req, res) => {
-    res.json({ text: "Get user" });
+    // Convert to Data Transfer Object (DTO)
+    const { firstName, lastName, email } = req.user;
+    return res.status(200).json({ message: { firstName, lastName, email } });
 };
 
 const loginUser = async (req, res) => {
@@ -49,7 +57,7 @@ const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
-        return res.json({
+        return res.status(200).json({
             id: user.id,
             email: user.email,
             token: generateToken(user.id)
@@ -60,8 +68,19 @@ const loginUser = async (req, res) => {
         .json({ message: "Invalid login attempt" });
 };
 
-const updateUser = (req, res) => {
-    res.json({ text: `Update user: ${req.params.id}` });
+const updateUser = async (req, res) => {
+    // Find by id instead
+    try {
+        const { firstName, lastName } = req.body;
+        const user = req.user;
+        const u = await User.findOneAndUpdate({ email: req.user.email }, { firstName, lastName }, { new: true, runValidators: true });
+        if (!user) return res.status(404).json({ message: 'No user found' });
+        // Create Data Transfer Object (DTO)
+        const response = { message: { firstName: u.firstName, lastName: u.lastName, email: u.email } };
+        return res.status(200).json(response);
+    } catch (error) {
+        res.status(400).json({ message: `Bad request` });
+    }
 };
 
 module.exports = {
