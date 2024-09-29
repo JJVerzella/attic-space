@@ -22,7 +22,7 @@ const uploadFile = async (req, res) => {
             userId: file.userId,
         });
     } catch (e) {
-        res.status(400).json({ message: 'Bad Request' });
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 };
 
@@ -105,7 +105,7 @@ const updateFile = async (req, res) => {
             userId: file.userId,
         });
     } catch (e) {
-        res.status(400).json({ message: 'Bad Request' });
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 };
 
@@ -115,7 +115,6 @@ const saveDocument = (req, res) => {
 
 const shareDocument = async (req, res) => {
     const documentId = req.params.id;
-    const user = req.user;
     const { users } = req.body;
 
     // Validation
@@ -123,7 +122,7 @@ const shareDocument = async (req, res) => {
     if (!results.isEmpty()) return res.status(400).json({ errors: results.array() });
 
     const file = await File.findById(documentId);
-    if (!file) return res.status(400).json({ message: 'File does not exist' });
+    if (!file) return res.status(404).json({ message: 'File does not exist' });
 
     // TODO: Check for duplicates
     const collaborators = users.map(user => user.email);

@@ -24,14 +24,19 @@ const DashboardContent = () => {
         const fetchFiles = async () => {
             try {
                 /** Remove hardcoded reference to URL */
-                const response = await axios.get('http://localhost:8000/api/v1/files/');
-                if (response && response.data && response.data.files) {
-                    setFiles(response.data.files.map(file => {
+                const token = localStorage.getItem('atticspace-token') || '';
+                const response = await axios.get('http://localhost:8000/api/v1/files/', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                if (response && response.data) {
+                    setFiles(response.data.map(file => {
                         return { key: uuidv4(), name: file.title };
                     }));
                 }
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         };
         fetchFiles();
@@ -65,13 +70,30 @@ const DashboardContent = () => {
         { label: 'Delete', key: 'delete', icon: <DeleteOutlined /> }
     ];
 
+    const uploadFile = async ({file}) => {
+        const token = localStorage.getItem('atticspace-token') || '';
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const response = await axios.post(
+                'http://localhost:8000/api/v1/files/upload', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+        } catch (e) {
+            console.error('Failed to upload file');
+        }
+    }
+
     return (
         <Layout style={{ padding: 10, height: '100%' }}>
             <Content style={{ margin: 10, backgroundColor: '#fff', padding: '20px', borderRadius: 10 }}>
                 <div>
                     <h2>Import Files</h2>
                     <Dragger
-                        action='http://localhost:8000/api/v1/files/upload'
+                        customRequest={uploadFile}
                         name='file'
                         showUploadList={false}
                     >

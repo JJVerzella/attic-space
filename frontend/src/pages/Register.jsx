@@ -20,7 +20,6 @@ function Register() {
         try {
             /** Remove hardcoded reference to URL */
             const response = await axios.post('http://localhost:8000/api/v1/users/register', formData);
-            console.log(response)
             if (response && response.data && response.data.token) {
                 registrationForm.resetFields();
                 localStorage.setItem('atticspace-token', response.data.token);
