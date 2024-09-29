@@ -20,5 +20,8 @@ describe('File API', () => {
         await mongoServer.stop();
     });
 
+    it("Sample test", () => {
+
+    });
 
 });
