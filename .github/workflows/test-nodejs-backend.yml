@@ -39,9 +39,9 @@ jobs:
     - name: Run tests
       working-directory: ./backend
       env:
-          BASE_URL: ${{ secrets.BASE_URL }}
-          PORT: ${{ secrets.PORT }}
-          NODE_ENV: ${{ secrets.NODE_ENV }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          MONGO_URI: ${{ secrets.MONGO_URI }}
+          echo "BASE_URL: ${{ secrets.BASE_URL }}" >> .env.development
+          echo "PORT: ${{ secrets.PORT }}" >> .env.development
+          echo "NODE_ENV: ${{ secrets.NODE_ENV }}" >> .env.development
+          echo "JWT_SECRET: ${{ secrets.JWT_SECRET }}" >> .env.development
+          echo "MONGO_URI: ${{ secrets.MONGO_URI }}" >> .env.development
       run: npm run test
