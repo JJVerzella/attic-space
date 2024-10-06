@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Form, Image, Input, Layout, message } from 'antd';
 
-
 const { Content } = Layout;
+const url = import.meta.env.VITE_SERVER_URL;
 
 function Register() {
 
@@ -18,8 +18,7 @@ function Register() {
 
     const register = async () => {
         try {
-            /** Remove hardcoded reference to URL */
-            const response = await axios.post('http://localhost:8000/api/v1/users/register', formData);
+            const response = await axios.post(`${url}/api/v1/users/register`, formData);
             if (response && response.data && response.data.token) {
                 registrationForm.resetFields();
                 localStorage.setItem('atticspace-token', response.data.token);

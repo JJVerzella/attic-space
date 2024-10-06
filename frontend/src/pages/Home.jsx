@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const { Content } = Layout;
+const url = import.meta.env.VITE_SERVER_URL;
 
 function Home() {
 
@@ -18,8 +19,7 @@ function Home() {
 
     const signIn = async () => {
         try {
-            /** Remove hardcoded reference to URL */
-            const response = await axios.post('http://localhost:8000/api/v1/users/login', formData);
+            const response = await axios.post(`${url}/api/v1/users/login`, formData);
             if (response && response.data && response.data.token) {
                 loginForm.resetFields();
                 localStorage.setItem('atticspace-token', response.data.token);

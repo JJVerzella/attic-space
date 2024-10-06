@@ -19,7 +19,7 @@ const options = {
         },
         servers: [
             {
-                url: "http://localhost:8000",
+                url: `${process.env.BASE_URL}:${process.env.PORT}`,
             },
         ],
     },
@@ -27,7 +27,10 @@ const options = {
 };
 const swaggerDocs = swaggerJsDoc(options);
 
-app.use(cors());
+app.use(cors({
+    origin: `${process.env.BASE_URL}`,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const { Content } = Layout;
 const { Dragger } = Upload;
+const url = import.meta.env.VITE_SERVER_URL;
 
 const DashboardContent = () => {
 
@@ -25,7 +26,7 @@ const DashboardContent = () => {
             try {
                 /** Remove hardcoded reference to URL */
                 const token = localStorage.getItem('atticspace-token') || '';
-                const response = await axios.get('http://localhost:8000/api/v1/files/', {
+                const response = await axios.get(`${url}/api/v1/files/`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -70,13 +71,13 @@ const DashboardContent = () => {
         { label: 'Delete', key: 'delete', icon: <DeleteOutlined /> }
     ];
 
-    const uploadFile = async ({file}) => {
+    const uploadFile = async ({ file }) => {
         const token = localStorage.getItem('atticspace-token') || '';
         const formData = new FormData();
         formData.append('file', file);
         try {
             const response = await axios.post(
-                'http://localhost:8000/api/v1/files/upload', formData, {
+                `${url}/api/v1/files/upload`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',

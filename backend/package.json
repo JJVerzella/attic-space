@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "server": "nodemon server.js",
-    "test": "jest"
+    "dev": "DOTENV_CONFIG_PATH=.env.development nodemon server.js",
+    "test": "DOTENV_CONFIG_PATH=.env.development jest",
+    "start": "DOTENV_CONFIG_PATH=.env.production node server.js"
   },
   "repository": {
     "type": "git",
