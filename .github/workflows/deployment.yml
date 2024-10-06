@@ -5,9 +5,6 @@ on:
   push:
     branches: [ "main" ]
 
-env:
-  AWS_REGION: MY_AWS_REGION
-
 permissions:
   contents: read
 
