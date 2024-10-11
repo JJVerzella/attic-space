@@ -12,11 +12,13 @@ const protectRoute = async (req, res, next) => {
             
             next();
         } catch (e) {
+            console.log('Called 1')
             return res.status(401).json({ message: "Not Authorized" });
         }
     }
 
     if (!token) {
+        console.log('Called 2')
         return res.status(401).json({ message: "Not Authorized" });
     }
 };

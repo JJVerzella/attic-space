@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const { body } = require('express-validator');
 const { protectRoute } = require('../middleware/authMiddleware');
-const { deleteFile, getFile, getFiles, shareDocument, updateFile, uploadFile } = require('../controllers/fileController');
+const { deleteFile, getFile, getFiles, shareDocument, updateFile, uploadFile, saveDocument } = require('../controllers/fileController');
 
 const router = express.Router();
 const upload = multer();
@@ -416,7 +416,7 @@ router.delete('/:id', protectRoute, deleteFile);
  *                 message:
  *                   type: string
  */
-router.put('/:id/share', protectRoute, [
+router.put('/:id/share', [
     body().isObject(),
     body('users').isArray().custom((value) => {
         return value.length !== 0;

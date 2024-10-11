@@ -7,7 +7,6 @@ const uploadFile = async (req, res) => {
     try {
         const file = await File.create({
             contentType: req.file.mimetype,
-            collaborators: [],
             data: req.file.buffer,
             size: req.file.size,
             title: req.file.originalname,
@@ -22,6 +21,7 @@ const uploadFile = async (req, res) => {
             userId: file.userId,
         });
     } catch (e) {
+        console.log(e);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
@@ -65,10 +65,16 @@ const getFile = async (req, res) => {
 
 const getFiles = async (req, res) => {
     try {
-        const userId = req.user._id;
-        const files = await File.find({ userId });
+        const { _id, email } = req.user;
+        const files = await File.find({
+            $or: [
+                { userId: _id },
+                { collaborators: { $in: [email] }}
+            ]
+        });
         res.status(200).json(files.map(file => {
             return {
+                id: file.id,
                 contentType: file.contentType,
                 data: file.data.toString('base64'),
                 size: file.size,
@@ -109,10 +115,6 @@ const updateFile = async (req, res) => {
     }
 };
 
-const saveDocument = (req, res) => {
-    res.status(200).json({});
-}
-
 const shareDocument = async (req, res) => {
     const documentId = req.params.id;
     const { users } = req.body;
@@ -131,4 +133,4 @@ const shareDocument = async (req, res) => {
     res.status(200).json({ message: {collaborators: updatedFile.collaborators}});
 }
 
-module.exports = { deleteFile, getFile, getFiles, saveDocument, shareDocument, updateFile, uploadFile };
+module.exports = { deleteFile, getFile, getFiles, shareDocument, updateFile, uploadFile };
