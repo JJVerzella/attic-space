@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Layout, Table, Upload } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Button, Image, Layout, Modal, Table, Upload } from 'antd';
 import {
     CopyOutlined,
     DeleteOutlined,
@@ -20,6 +21,9 @@ const url = import.meta.env.VITE_SERVER_URL;
 const DashboardContent = () => {
 
     const [files, setFiles] = useState([]);
+    const navigate = useNavigate();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [image, setImage] = useState(false);
 
     useEffect(() => {
         const fetchFiles = async () => {
@@ -33,7 +37,14 @@ const DashboardContent = () => {
                 });
                 if (response && response.data) {
                     setFiles(response.data.map(file => {
-                        return { key: uuidv4(), name: file.title };
+                        return {
+                            key: uuidv4(),
+                            id: file.id,
+                            name: file.title,
+                            contentType: file.contentType,
+                            base64: file.data,
+                            fileSize: file.size,
+                        };
                     }));
                 }
             } catch (e) {
@@ -45,11 +56,11 @@ const DashboardContent = () => {
 
     const columns = [
         { title: 'Name', dataIndex: 'name', key: 'name' },
+        { title: 'File Size', dataIndex: 'fileSize', key: 'fileSize' },
         /*
             { title: 'URL', dataIndex: 'imageUrl', key: 'imageUrl', render: (text) => <img src={text} /> },
             { title: 'Owner', dataIndex: 'owner', key: 'owner' },
             { title: 'Last Modified', dataIndex: 'lastModified', key: 'lastModified' },
-            { title: 'File Size', dataIndex: 'fileSize', key: 'fileSize' },
             {
                 title: 'Action', dataIndex: 'action', key: 'action', render: () => (
                     <Dropdown menu={{ items }}>
@@ -88,28 +99,62 @@ const DashboardContent = () => {
         }
     }
 
+    const createDocument = async () => {
+        const token = localStorage.getItem('atticspace-token') || '';
+        const response = await axios.post(`${url}/document`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        if (response.data && response.data.id) {
+            const documentId = response.data.id;
+            navigate(`/document/${documentId}/`);
+        }
+    }
+
+    const onRowClicked = (row) => {
+        const { id, contentType } = row;
+        if (contentType == 'text/plain') {
+            navigate(`/document/${id}`);
+        }
+        if (contentType == 'image/png') {
+            setIsModalOpen(true);
+            setImage('data:image/png;base64,' + row.base64);
+        }
+    }
+
     return (
-        <Layout style={{ padding: 10, height: '100%' }}>
-            <Content style={{ margin: 10, backgroundColor: '#fff', padding: '20px', borderRadius: 10 }}>
-                <div>
-                    <h2>Import Files</h2>
-                    <Dragger
-                        customRequest={uploadFile}
-                        name='file'
-                        showUploadList={false}
-                    >
-                        <p className="ant-upload-drag-icon">
-                            <InboxOutlined />
-                        </p>
-                        <p className="ant-upload-text">Click or drag files to upload</p>
-                    </Dragger>
-                </div>
-            </Content>
-            <Content style={{ margin: 10, backgroundColor: '#fff', padding: '20px', borderRadius: 10 }}>
-                <h2>Files</h2>
-                <Table columns={columns} dataSource={files} />
-            </Content>
-        </Layout>
+        <>
+            <Modal title="Image" open={isModalOpen}>
+                <Image src={image} preview={false} />
+            </Modal>
+
+            <Layout style={{ padding: 10, height: '100%' }}>
+                <h1>Welcome</h1>
+                <Content style={{ margin: 10, backgroundColor: '#fff', padding: '20px', borderRadius: 10 }}>
+                    <div>
+                        <h2>Import Files</h2>
+                        <Dragger
+                            customRequest={uploadFile}
+                            name='file'
+                            showUploadList={false}
+                        >
+                            <p className="ant-upload-drag-icon">
+                                <InboxOutlined />
+                            </p>
+                            <p className="ant-upload-text">Click or drag files to upload</p>
+                        </Dragger>
+                    </div>
+                </Content>
+                <Content style={{ margin: 10, backgroundColor: '#fff', padding: '20px', borderRadius: 10 }}>
+                    <Button onClick={createDocument}>Create Document</Button>
+                    <h2>Files</h2>
+                    <Table columns={columns} dataSource={files} onRow={(row) => ({
+                        onClick: () => onRowClicked(row)
+                    })} />
+                </Content>
+            </Layout>
+        </>
     );
 };
 

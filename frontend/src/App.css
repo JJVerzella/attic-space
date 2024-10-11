@@ -1,1 +1,19 @@
-body { margin: 0; }
+body {
+    margin: 0;
+}
+
+.quill {
+    height: 100vh
+}
+
+.quill .ql-container {
+    border: none;
+    display: flex;
+    justify-content: center;
+}
+
+.quill .ql-editor {
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, .1);
+    height: 11in;
+    width: 8.5in;
+}
