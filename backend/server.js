@@ -21,7 +21,7 @@ const options = {
         },
         servers: [
             {
-                url: `${process.env.BASE_URL}:${parseInt(process.env.PORT)}`,
+                url: `${process.env.BASE_URL}:${8000}`,
             },
         ],
     },
@@ -43,7 +43,7 @@ app.use('/api/v1/documents', documentRoutes);
 
 if (require.main === module) {
     connect();
-    const PORT = parseInt(process.env.PORT) || 5000;
+    const PORT = 8000;  // parseInt(process.env.PORT) || 5000;
     const server = app.listen(PORT, () => {
         console.log(`Server listening on port ${PORT}`);
     });
