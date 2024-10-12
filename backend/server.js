@@ -11,6 +11,8 @@ const connect = require('./configs/db');
 
 const app = express();
 
+const SECRETS = JSON.parse(process.env.SECRETS);
+
 const options = {
     definition: {
         openapi: "3.1.0",
@@ -21,7 +23,7 @@ const options = {
         },
         servers: [
             {
-                url: `${process.env.BASE_URL}:${8000}`,
+                url: `${SECRETS.BASE_URL}:${8000}`,
             },
         ],
     },
@@ -43,14 +45,14 @@ app.use('/api/v1/documents', documentRoutes);
 
 if (require.main === module) {
     connect();
-    const PORT = 8000;  // parseInt(process.env.PORT) || 5000;
+    const PORT = 8000;  // parseInt(SECRETS.PORT) || 5000;
     const server = app.listen(PORT, () => {
         console.log(`Server listening on port ${PORT}`);
     });
 
     const instance = io(server, {
         cors: {
-            origin: process.env.FRONTEND_URL,
+            origin: SECRETS.FRONTEND_URL,
             methods: ['GET', 'POST'],
         }
     });
