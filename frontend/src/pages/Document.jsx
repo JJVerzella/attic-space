@@ -1,64 +1,66 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import DocumentHeader from '../components/DocumentHeader';
-import axios from 'axios';
+import { useLocation, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { notification } from 'antd';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-
+import DocumentHeader from '../components/DocumentHeader';
+import { getDocument } from '../services/apiService';
 
 const url = import.meta.env.VITE_SERVER_URL;
 
 function Document() {
-    const quillRef = useRef(null);
     const { documentId } = useParams();
+    const location = useLocation();
+    const quillRef = useRef(null);
+
     const [content, setContent] = useState();
-
-    /* Socket.io code */
+    const [documentTitle, setDocumentTitle] = useState();
     const [socket, setSocket] = useState();
-    /* End Socket.io code*/
+    const user = location.state?.user;
 
-    const triggerNotification = ({name}) => {
+    const triggerNotification = ({ name }) => {
         notification.open({
-            message: 'User Joined Document',
+            message: 'Collaborator Entered the Document',
             description: `${name} has entered the document`,
             placement: 'topRight'
         })
     }
 
     useEffect(() => {
-        /* Socket.io code */
         const sock = io(`${url}`);
         setSocket(sock);
-        /* End Socket.io code */
 
         const fetchDocument = async (documentId) => {
-            const token = localStorage.getItem('atticspace-token') || '';
-            const response = await axios.get(`${url}/document/${documentId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (response && response.data) {
-                setContent(window.atob(response.data.data));
+            try {
+                const token = localStorage.getItem('atticspace-token') || '';
+                const data = await getDocument(token, documentId);
+                if (!data) return;
+                setContent(window.atob(data.data));
+                setDocumentTitle(data.title);
                 sock.emit('joinRoom', { documentId });
+            } catch (e) {
+                if (e.response && e.response.data) {
+                    console.error(e.response.data.message);
+                } else {
+                    console.error('Failed to retrieve document');
+                }
             }
         };
 
         fetchDocument(documentId);
-
         return () => {
             sock.disconnect();
-            console.log('Socket disconnected');
         }
     }, []);
 
     useEffect(() => {
-        if (socket) {
-            socket.on('joined', (e) => {
-                triggerNotification({name: 'JJ'})
+        if (socket && user && user?.firstName) {
+            socket.on('joined', (_) => {
+                triggerNotification({ name: user.firstName });
             })
         }
-    }, [socket]);
+    }, [socket, user]);
 
     useEffect(() => {
         if (socket) {
@@ -66,9 +68,9 @@ function Document() {
                 setContent(e);
             })
         }
-    }, [socket]);
+    }, [setContent, socket]);
 
-    const onChange = (value, delta) => {
+    const onChange = (value) => {
         setContent(value);
         if (!socket) return;
         socket.emit('documentUpdated', value);
@@ -78,8 +80,8 @@ function Document() {
         <>
             {document ? (
                 <>
-                    <DocumentHeader socket={socket} documentId={documentId} documentTitle={document.title} documentContent={content} />
-                    <ReactQuill ref={quillRef} theme='snow' onChange={onChange} value={content} />
+                    <DocumentHeader documentContent={content} documentId={documentId} documentTitle={documentTitle} setContent={setContent} socket={socket} />
+                    <ReactQuill onChange={onChange} ref={quillRef} theme='snow' value={content} />
                 </>
             ) : (<p>No document found</p>)}
         </>

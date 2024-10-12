@@ -1,65 +1,105 @@
-import { useState } from 'react';
-import { Button, Modal, Input } from 'antd';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { Button, Modal, Input, Table } from 'antd';
+import { getDocumentVersions, saveDocument, shareDocument } from '../services/apiService';
 
 const { Search } = Input;
-const url = import.meta.env.VITE_SERVER_URL;
 
-const DocumentHeader = ({ socket, documentId, documentTitle, documentContent }) => {
+const DocumentHeader = ({ documentContent, documentId, documentTitle, setContent, socket }) => {
     const [id, setId] = useState();
-    const [title, setTitle] = useState(documentTitle);
+    const [title, setTitle] = useState();
+    const [versions, setVersions] = useState();
 
-    useState(() => { setId(documentId); }, [setId]);
+    useEffect(() => {
+        setId(documentId);
+        setTitle(documentTitle);
+    }, [setId, setTitle, documentId, documentTitle]);
 
-    const onSave = async () => {
-        const token = localStorage.getItem('atticspace-token') || '';
-        const response = await axios.patch(`${url}/document/${id}`, {
-            content: documentContent
-        }, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+    const onSaveClicked = async () => {
+        try {
+            const token = localStorage.getItem('atticspace-token') || '';
+            await saveDocument(token, documentId, documentContent);
+        } catch (e) {
+            if (e.response && e.response.data) {
+                console.error(e.response.data.message);
+            } else {
+                console.error('Failed to save document');
+            }
+        }
     };
 
+    // Share Document Modal
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-    const onShare = () => {
-        setIsShareModalOpen(true);
-    };
-
+    const onShareClicked = () => { setIsShareModalOpen(true); };
     const onShareOk = () => { setIsShareModalOpen(false); };
     const onShareClose = () => { setIsShareModalOpen(false); };
     const onShareCancel = () => { setIsShareModalOpen(false); };
+
     const onSearch = async (searchString) => {
-        const token = localStorage.getItem('atticspace-token') || '';
-        const response = await axios.put(`${url}/api/v1/files/${id}/share`, {
-            headers: { Authorization: `Bearer ${token}` },
-            users: [{email: searchString}]
-        });
-        if (socket && response) {
-            socket.emit('fileShared', {documentId, email: 'jane.doe@gmail.com'})
+        try {
+            const token = localStorage.getItem('atticspace-token') || '';
+            await shareDocument(token, id, searchString);
+        } catch (e) {
+            if (e.response && e.response.data) {
+                console.error(e.response.data.message);
+            } else {
+                console.error('Failed to share document');
+            }
         }
     }
 
+    // Versioning Modal
     const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
-    const onVersion = () => {
-        setIsVersionModalOpen(true);
-    };
-
     const onVersionOk = () => { setIsVersionModalOpen(false); };
     const onVersionClose = () => { setIsVersionModalOpen(false); };
     const onVersionCancel = () => { setIsVersionModalOpen(false); };
 
+    const onVersionClicked = async () => {
+        try {
+            const token = localStorage.getItem('atticspace-token') || '';
+            const data = await getDocumentVersions(token, id);
+            if (!data) return;
+            setVersions(data.versions.map(version => {
+                return {
+                    data: version.data,
+                    number: 1,
+                    revert: 'Revert to version #',
+                }
+            }));
+            setIsVersionModalOpen(true);
+        } catch (e) {
+            if (e.response && e.response.data) {
+                console.error(e.response.data.message);
+            } else {
+                console.error('Failed to retrieve document versions');
+            }
+        }
+    };
+
+    const onVersionDoubleClicked = (row) => {
+        setContent(window.atob(row.data));
+        setIsVersionModalOpen(false);
+    }
+
+    const versionColumns = [
+        { title: 'Version Number', dataIndex: 'number', key: 'number' },
+        { title: 'Revert', dataIndex: 'revert', key: 'revert' }
+    ];
 
     return (
         <>
-            <Modal open={isShareModalOpen} onOk={onShareOk} onClose={onShareClose} onCancel={onShareCancel} title='Share'>
-                <Search placeholder="Search for user" enterButton="Share" onSearch={onSearch} />
+            <Modal onCancel={onShareCancel} onClose={onShareClose} onOk={onShareOk} open={isShareModalOpen} title='Share'>
+                <Search enterButton="Share" onSearch={onSearch} placeholder="Share with a user" />
             </Modal>
-            <Modal open={isVersionModalOpen} onOk={onVersionOk} onClose={onVersionClose} onCancel={onVersionCancel} title='Version'></Modal>
+            <Modal onCancel={onVersionCancel} onClose={onVersionClose} onOk={onVersionOk} open={isVersionModalOpen} title='Version'>
+                <Table columns={versionColumns} dataSource={versions} onRow={(row) => ({
+                    onDoubleClick: () => onVersionDoubleClicked(row)
+                })}></Table>
+            </Modal>
 
             <h1>{title}</h1>
-            <Button onClick={onSave}>Save</Button>
-            <Button onClick={onShare}>Share</Button>
-            <Button onClick={onVersion}>Versions</Button>
+            <Button onClick={onSaveClicked}>Save</Button>
+            <Button onClick={onShareClicked}>Share</Button>
+            <Button onClick={onVersionClicked}>Versions</Button>
         </>
     );
 };

@@ -1,8 +1,15 @@
 const express = require('express');
 const multer = require('multer');
 const { body } = require('express-validator');
+const {
+    deleteFile,
+    getFile,
+    getFiles,
+    shareDocument,
+    updateFile,
+    uploadFile,
+} = require('../controllers/fileController');
 const { protectRoute } = require('../middleware/authMiddleware');
-const { deleteFile, getFile, getFiles, shareDocument, updateFile, uploadFile, saveDocument } = require('../controllers/fileController');
 
 const router = express.Router();
 const upload = multer();
