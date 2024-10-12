@@ -82,7 +82,7 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def-backend.outputs.task-definition }}
-        service: atticspace-be-service
+        service: atticspace-be-srv
         cluster: atticspace-cluster
         wait-for-service-stability: true
 
@@ -90,6 +90,6 @@ jobs:
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
-        service: atticspace-fe-service
+        service: atticspace-fe-srv
         cluster: atticspace-cluster
         wait-for-service-stability: true
