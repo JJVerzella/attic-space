@@ -1,4 +1,8 @@
 FROM node:alpine3.19 AS build
+
+ARG VITE_SERVER_URL
+ENV VITE_SERVER_URL=$VITE_SERVER_URL
+
 WORKDIR /frontend
 COPY package.json ./
 RUN npm install
