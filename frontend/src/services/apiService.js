@@ -8,7 +8,7 @@ const UPLOAD_FILES_ENDPOINT = 'api/v1/files/upload';
 
 const createDocument = async (token) => {
     try {
-        const response = await axios.post(`/${CREATE_DOCUMENT_ENDPOINT}`, {}, {
+        const response = await axios.post(`:8000/${CREATE_DOCUMENT_ENDPOINT}`, {}, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
@@ -19,7 +19,7 @@ const createDocument = async (token) => {
 
 const getDocument = async (token, documentId) => {
     try {
-        const response = await axios.get(`/api/v1/documents/${documentId}`, {
+        const response = await axios.get(`:8000/api/v1/documents/${documentId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
@@ -30,7 +30,7 @@ const getDocument = async (token, documentId) => {
 
 const getDocumentVersions = async (token, documentId) => {
     try {
-        const response = await axios.get(`/api/v1/documents/${documentId}/versions`, {
+        const response = await axios.get(`:8000/api/v1/documents/${documentId}/versions`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         return response.data;
@@ -41,7 +41,7 @@ const getDocumentVersions = async (token, documentId) => {
 
 const getFiles = async (token) => {
     try {
-        const response = await axios.get(`/${GET_FILES_ENDPOINT}`, {
+        const response = await axios.get(`:8000/${GET_FILES_ENDPOINT}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
@@ -53,7 +53,7 @@ const getFiles = async (token) => {
 const register = async (formData) => {
     try {
         const response = await axios.post(
-            `/${REGISTER_ENDPOINT}`, formData);
+            `:8000/${REGISTER_ENDPOINT}`, formData);
         return response.data;
     } catch (e) {
         throw e;
@@ -62,7 +62,7 @@ const register = async (formData) => {
 
 const saveDocument = async (token, documentId, documentContent) => {
     try {
-        const response = await axios.patch(`/api/v1/documents/${documentId}`,
+        const response = await axios.patch(`:8000/api/v1/documents/${documentId}`,
             { content: documentContent },
             { headers: { 'Authorization': `Bearer ${token}` }}
         );
@@ -74,7 +74,7 @@ const saveDocument = async (token, documentId, documentContent) => {
 
 const shareDocument = async (token, documentId, emailString) => {
     try {
-        const response = await axios.put(`/api/v1/files/${documentId}/share`, {
+        const response = await axios.put(`:8000/api/v1/files/${documentId}/share`, {
             headers: { Authorization: `Bearer ${token}` },
             users: [{ email: emailString }]
         });
@@ -87,7 +87,7 @@ const shareDocument = async (token, documentId, emailString) => {
 const signIn = async (formData) => {
     try {
         const response = await axios.post(
-            `/${SIGNIN_ENDPOINT}`, formData);
+            `:8000/${SIGNIN_ENDPOINT}`, formData);
         return response.data;
     } catch (e) {
         throw e;
@@ -96,7 +96,7 @@ const signIn = async (formData) => {
 
 const uploadFiles = async (token, formData) => {
     try {
-        const response = await axios.post(`/${UPLOAD_FILES_ENDPOINT}`,
+        const response = await axios.post(`:8000/${UPLOAD_FILES_ENDPOINT}`,
             formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
