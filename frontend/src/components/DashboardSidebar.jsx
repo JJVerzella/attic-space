@@ -11,7 +11,6 @@ import {
 const { Sider } = Layout;
 
 const DashboardSidebar = () => {
-
     const menuItems = [
         { key: 'home', icon: <HomeOutlined />, label: 'Home' },
         { key: 'files', icon: <FileTextOutlined />, label: 'My Files' },

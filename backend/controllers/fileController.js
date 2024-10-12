@@ -21,7 +21,6 @@ const uploadFile = async (req, res) => {
             userId: file.userId,
         });
     } catch (e) {
-        console.log(e);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
@@ -80,6 +79,7 @@ const getFiles = async (req, res) => {
                 size: file.size,
                 title: file.title,
                 userId: file.userId,
+                lastModified: file.updatedAt
             };
         }));
     } catch (e) {
@@ -133,4 +133,11 @@ const shareDocument = async (req, res) => {
     res.status(200).json({ message: {collaborators: updatedFile.collaborators}});
 }
 
-module.exports = { deleteFile, getFile, getFiles, shareDocument, updateFile, uploadFile };
+module.exports = {
+    deleteFile,
+    getFile,
+    getFiles,
+    shareDocument,
+    updateFile,
+    uploadFile
+};

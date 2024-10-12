@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Form, Image, Input, Layout, message } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { Button, Form, Image, Input, Layout, message } from 'antd';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { signIn } from '../services/apiService';
 
 const { Content } = Layout;
-const url = import.meta.env.VITE_SERVER_URL;
 
-function Home() {
-
+function Home({ setIsUserSignedIn }) {
     const navigate = useNavigate();
     const [loginForm] = Form.useForm();
     const [formData, setFormData] = useState({});
@@ -17,19 +15,19 @@ function Home() {
         setFormData(allValues);
     };
 
-    const signIn = async () => {
+    const onSignInFinished = async () => {
         try {
-            const response = await axios.post(`${url}/api/v1/users/login`, formData);
-            if (response && response.data && response.data.token) {
-                loginForm.resetFields();
-                localStorage.setItem('atticspace-token', response.data.token);
-                navigate("/dashboard");
-            }
+            const data = await signIn(formData);
+            if (!data.token) return;
+            loginForm.resetFields();
+            setIsUserSignedIn(true);
+            localStorage.setItem('atticspace-token', data.token);
+            navigate("/dashboard", { state: { user: data } });
         } catch (e) {
             if (e.response && e.response.data) {
                 message.error(e.response.data.message);
             } else {
-                message.error('An error has occurred in the system. Try again later!')
+                message.error('An error has occurred in the system. Please try again later!');
             }
         }
     };
@@ -38,12 +36,7 @@ function Home() {
         <Layout style={{ minHeight: '100vh' }}>
             <Content style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: '25px', justifyContent: 'center' }}>
                 <Image alt='AtticSpace Logo' preview={false} src='/atticspace-black.png' width='300px' />
-                <Form
-                    name="login"
-                    form={loginForm}
-                    onValuesChange={onSignInFormChanged}
-                    onFinish={signIn}
-                >
+                <Form form={loginForm} name="login" onFinish={onSignInFinished} onValuesChange={onSignInFormChanged}>
                     <Form.Item name='email' rules={[{ required: true, message: 'Email address required' }]}>
                         <Input prefix={<UserOutlined />} placeholder='Email' />
                     </Form.Item>
@@ -59,7 +52,7 @@ function Home() {
                 </Form>
             </Content>
         </Layout>
-    )
+    );
 }
 
 export default Home;

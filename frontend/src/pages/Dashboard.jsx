@@ -1,17 +1,22 @@
+import { useLocation } from 'react-router-dom';
 import { Layout } from 'antd';
-import DashboardHeader from '../components/DashboardHeader';
-import DashboardSidebar from '../components/DashboardSidebar';
+import DashboardHeaderBar from '../components/DashboardHeaderBar';
 import DashboardContent from '../components/DashboardContent';
+import DashboardSidebar from '../components/DashboardSidebar';
 
-function Dashboard() {
+function Dashboard({ setIsUserSignedIn }) {
+    const location = useLocation();
+    const user = location.state?.user;
+
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <DashboardHeader />
+            <DashboardHeaderBar setIsUserSignedIn={setIsUserSignedIn} user={user} />
             <Layout>
                 <DashboardSidebar />
-                <DashboardContent />
+                <DashboardContent user={user} />
             </Layout>
         </Layout >
+
     )
 }
 

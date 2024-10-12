@@ -3,11 +3,11 @@ const cors = require('cors');
 require('dotenv/config');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
+const io = require('socket.io');
 const userRoutes = require('./routes/userRoutes');
 const fileRoutes = require('./routes/fileRoutes');
 const documentRoutes = require('./routes/documentRoutes');
 const connect = require('./configs/db');
-const io = require('socket.io');
 
 const app = express();
 
@@ -30,7 +30,7 @@ const options = {
 const swaggerDocs = swaggerJsDoc(options);
 
 app.use(cors({
-    origin: '*',  // Remove in production environment
+    origin: '*',
     methods: ['GET', 'PATCH', 'POST', 'PUT', 'DELETE'],
 }));
 app.use(express.json());
@@ -39,27 +39,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/files', fileRoutes);
-
-app.use('/document', documentRoutes);
+app.use('/api/v1/documents', documentRoutes);
 
 if (require.main === module) {
-    const activeUsers = {};
-
     connect();
     const PORT = process.env.PORT || 5000;
     const server = app.listen(PORT, () => {
         console.log(`Server listening on port ${PORT}`);
     });
 
-    /** Socket.io code */
     const instance = io(server, {
         cors: {
             origin: process.env.FRONTEND_URL,
             methods: ['GET', 'POST'],
         }
     });
-    instance.on('connection', socket => {
 
+    instance.on('connection', socket => {
         socket.on("documentUpdated", delta => {
             socket.broadcast.emit('documentChanges', delta);
         });
@@ -71,13 +67,7 @@ if (require.main === module) {
                     'joined', 'Welcome another one!');
             }
         });
-
-        socket.on('fileShared', ({email, documentId}) => {
-            console.log(email);
-            console.log(documentId);
-        })
     });
-    /** End Socket.io code */
 }
 
 module.exports = app;

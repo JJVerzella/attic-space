@@ -21,7 +21,6 @@ const createDocument = async (req, res) => {
             userId: file.userId,
         })
     } catch (e) {
-        console.log(e);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 }
@@ -61,6 +60,7 @@ const saveDocument = async (req, res) => {
     const { content } = req.body;
     const { _id, email } = req.user;
     try {
+        const newVersion = { data: content };
         await File.updateOne({
             _id: documentId,
             $or: [
@@ -68,7 +68,7 @@ const saveDocument = async (req, res) => {
                 { collaborators: { $in: [email] } }
             ]
         },
-            { data: content }
+            { data: content, $push: { versions: newVersion } }
         );
         res.status(204).json({});
     } catch (_) {
@@ -99,4 +99,27 @@ const shareDocument = async (req, res) => {
     }
 }
 
-module.exports = { createDocument, getDocument, saveDocument, shareDocument };
+const getDocumentVersions = async (req, res) => {
+    const { documentId } = req.params;
+    let file;
+    try {
+        file = await File.findById(documentId);
+        if (file.versions) {
+            res.status(200).json({versions: file.versions.map(version => {
+                return { data: version.data.toString('base64') }
+            })})
+        } else {
+            res.status(200).json({versions: []})
+        }
+    } catch (_) {
+        res.status(500).json({message: 'Internal Server Error'});
+    }
+}
+
+module.exports = {
+    createDocument,
+    getDocument,
+    getDocumentVersions,
+    saveDocument,
+    shareDocument
+};
