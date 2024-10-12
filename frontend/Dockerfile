@@ -12,5 +12,6 @@ RUN npm run build
 # nginx configuration
 FROM nginx:mainline-bookworm
 COPY --from=build /frontend/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
