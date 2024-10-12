@@ -1,10 +1,10 @@
-require('dotenv/config');
 const mongoose = require("mongoose");
 
 const connect = async () => {
     try {
-        console.log(process.env.SECRETS.MONGO_URI);
-        await mongoose.connect(process.env.SECRETS.MONGO_URI);
+        const SECRETS = JSON.parse(process.env.SECRETS);
+        console.log(SECRETS.MONGO_URI);
+        await mongoose.connect(SECRETS.MONGO_URI);
     }
     catch (e) {
         console.error('Connection failed');

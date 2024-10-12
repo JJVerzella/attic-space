@@ -6,8 +6,9 @@ const protectRoute = async (req, res, next) => {
     let token = "";
     if (authorization && authorization.startsWith("Bearer")) {
         try {
+            const SECRETS = JSON.parse(process.env.SECRETS);
             token = authorization.split(" ")[1];
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, SECRETS.JWT_SECRET);
             req.user = await User.findById(decoded.id).select("-password");
             
             next();
