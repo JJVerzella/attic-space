@@ -36,15 +36,8 @@ jobs:
       working-directory: ./backend
       run: npm install
 
-    - name: Setup environment secrets
-      working-directory: ./backend
-      run: |
-        echo "BASE_URL: ${{ secrets.BASE_URL }}" >> .env.development
-        echo "PORT: ${{ secrets.PORT }}" >> .env.development
-        echo "NODE_ENV: ${{ secrets.NODE_ENV }}" >> .env.development
-        echo "JWT_SECRET: ${{ secrets.JWT_SECRET }}" >> .env.development
-        echo "MONGO_URI: ${{ secrets.MONGO_URI }}" >> .env.development
-
     - name: Run tests
+      env:
+        SECRETS: ${{ secrets.SECRETS }}
       working-directory: ./backend
       run: npm run test
