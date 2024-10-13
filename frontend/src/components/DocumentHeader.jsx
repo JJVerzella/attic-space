@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Button, Modal, Input, Table } from 'antd';
+import { Button, Modal, Input, Table, Flex } from 'antd';
+import { v4 as uuidv4 } from 'uuid';
 import { getDocumentVersions, saveDocument, shareDocument } from '../services/apiService';
 
 const { Search } = Input;
@@ -58,11 +59,13 @@ const DocumentHeader = ({ documentContent, documentId, documentTitle, setContent
             const token = localStorage.getItem('atticspace-token') || '';
             const data = await getDocumentVersions(token, id);
             if (!data) return;
-            setVersions(data.versions.map(version => {
+            setVersions(data.versions.map((version, index) => {
+                let versionNumber = index + 1;
                 return {
+                    key: uuidv4(),
                     data: version.data,
-                    number: 1,
-                    revert: 'Revert to version #',
+                    number: versionNumber,
+                    revert: `Revert to version #${versionNumber}`,
                 }
             }));
             setIsVersionModalOpen(true);
@@ -96,10 +99,14 @@ const DocumentHeader = ({ documentContent, documentId, documentTitle, setContent
                 })}></Table>
             </Modal>
 
-            <h1>{title}</h1>
-            <Button onClick={onSaveClicked}>Save</Button>
-            <Button onClick={onShareClicked}>Share</Button>
-            <Button onClick={onVersionClicked}>Versions</Button>
+            <Flex align='center' justify='space-between' style={{margin: '0 10px'}}>
+                <h1>{title}</h1>
+                <div>
+                    <Button style={{margin: '0 5px'}} onClick={onSaveClicked}>Save</Button>
+                    <Button style={{margin: '0 5px'}} onClick={onShareClicked}>Share</Button>
+                    <Button style={{margin: '0 5px'}} onClick={onVersionClicked}>Versions</Button>
+                </div>
+            </Flex>
         </>
     );
 };

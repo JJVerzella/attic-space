@@ -52,7 +52,7 @@ if (require.main === module) {
 
     const instance = io(server, {
         cors: {
-            origin: SECRETS.BASE_URL,
+            origin: '*',
             methods: ['GET', 'POST'],
         }
     });

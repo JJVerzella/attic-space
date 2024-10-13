@@ -1,8 +1,6 @@
 import axios from 'axios';
 
 const url = import.meta.env.VITE_SERVER_URL;
-console.log(url);
-console.log(import.meta.env);
 
 const CREATE_DOCUMENT_ENDPOINT = 'api/v1/documents';
 const GET_FILES_ENDPOINT = 'api/v1/files';
