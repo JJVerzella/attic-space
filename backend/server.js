@@ -11,7 +11,7 @@ const connect = require('./configs/db');
 
 const app = express();
 
-const SECRETS = JSON.parse(process.env.SECRETS);
+const SECRETS = JSON.parse(process.env.SECRETS || '{}');
 
 const options = {
     definition: {
