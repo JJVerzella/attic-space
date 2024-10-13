@@ -36,11 +36,8 @@ jobs:
       working-directory: ./backend
       run: npm install
 
-    - name: Setup environment secrets
-      working-directory: ./backend
-      run: |
-        echo "SECRETS: ${{ secrets.SECRETS }}" >> .env.development
-
     - name: Run tests
+      env:
+        SECRETS: ${{ secrets.SECRETS }}
       working-directory: ./backend
       run: npm run test
